@@ -38,10 +38,9 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         #self.avatar = pygame.Surface((PLAYER_X, PLAYER_Y))
         #self.avatar.fill((0, 0, 0))
-        self.avatar = pygame.image.load("player.jpg").convert()
+        self.avatar = pygame.image.load("right.png").convert_alpha()
         self.avatar.set_colorkey((255, 255, 255))
-        self.avatar = pygame.transform.scale(self.avatar, (80, 130))
-        self.avatar.convert_alpha()
+        self.avatar = pygame.transform.smoothscale(self.avatar, (100, 150))
         self.rect = self.avatar.get_rect(
             center = (
                 20,
@@ -135,6 +134,7 @@ while True: # game loop- controls whether the program should be running or when 
         screen.blit(entity.avatar, entity.rect)
     # check for collisions
     if pygame.sprite.spritecollideany(player, enemies):
+        # you lose! try again page
         player.kill()
         main_sound.stop()
         collision_sound.play()
