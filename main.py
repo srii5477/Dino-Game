@@ -19,43 +19,64 @@ import random
 
 # initializing pygame library- allows pygame to connects its abstractions to my hardware
 pygame.init()
-PLAYER_X = 75
-PLAYER_Y = 25
+
+                
+# setting up game screen
+WIDTH = 600
+HEIGHT = 800
+
+# set up a clock to slow down the frame rate
+clock = pygame.time.Clock()
+
+main_sound = pygame.mixer.Sound("retro-wave-style-track-59892.mp3")
+main_sound.play()
+
+collision_sound = pygame.mixer.Sound("arcade-bleep-sound-6071.mp3")
 # extend pygame.sprite.Sprite using super() (inheritance, returns a delegate object to the parent and extends its functionality)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.avatar = pygame.Surface((PLAYER_X, PLAYER_Y))
-        self.avatar.fill((0, 0, 0))
-        self.rect = self.avatar.get_rect()
-        self.x = PLAYER_X
-        self.y = PLAYER_Y
+        #self.avatar = pygame.Surface((PLAYER_X, PLAYER_Y))
+        #self.avatar.fill((0, 0, 0))
+        self.avatar = pygame.image.load("player.jpg").convert()
+        self.avatar.set_colorkey((255, 255, 255))
+        self.avatar = pygame.transform.scale(self.avatar, (80, 130))
+        self.avatar.convert_alpha()
+        self.rect = self.avatar.get_rect(
+            center = (
+                20,
+                HEIGHT/2
+            )
+        )
     def update(self, pressed):
         if pressed[pygame.K_UP]:
-            self.y -= 5
+            self.rect.move_ip(0, -10)
         if pressed[pygame.K_DOWN]:
-            self.y += 5
+            self.rect.move_ip(0, 10)
         if pressed[pygame.K_RIGHT]:
-            self.x += 5
+            self.rect.move_ip(10, 0)
         if pressed[pygame.K_LEFT]:
-            self.x -= 5
+            self.rect.move_ip(-10, 0)
         # prevent player from hurtling off screen
-        if self.x < 0:
-            self.x = 0
-        if self.y <= 0:
-            self.y = 0
-        if self.x > WIDTH:
-            self.x = WIDTH - 25
-        if self.y >= HEIGHT:
-            self.y = HEIGHT - 25
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.top <= 0:
+            self.rect.top = 0
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH - 25
+        if self.rect.bottom >= HEIGHT:
+            self.rect.bottom = HEIGHT - 25
             
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init()
+        super().__init__()
         self.x = 20
         self.y = 10
-        self.avatar = pygame.Surface((self.x, self.y))
-        self.avatar.fill((45, 60, 0))
+        #self.avatar = pygame.Surface((self.x, self.y))
+        #self.avatar.fill((45, 60, 0))
+        self.avatar = pygame.image.load("enemy.jpg").convert()
+        self.avatar.set_colorkey((255, 255, 255))
+        self.avatar = pygame.transform.scale(self.avatar, (80, 80))
         self.rect = self.avatar.get_rect(
             center = (
                 random.randint(WIDTH + 20, WIDTH + 100),
@@ -64,17 +85,20 @@ class Enemy(pygame.sprite.Sprite):
         )
         self.speed = random.randint(5, 20)
     def update(self):
-        self.x -= self.speed
-        if self.x < 0:
+        self.rect.move_ip(-self.speed, 0)
+        if self.rect.right < 0:
             self.kill()
         
-                
-# setting up game screen
-WIDTH = 500
-HEIGHT = 500
 screen = pygame.display.set_mode([HEIGHT, WIDTH]) # provide a list or tuple to define the screen size
-pygame.display.set_caption("Google Internetless Game")
+pygame.display.set_caption("Dodge the Ball!")
 player = Player()
+enemies = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
+all_sprites.add(player)
+''' now we have to create a steady supply of enemies aka obstacles at regular intervals- create a custom event
+and set its interval '''
+ADD_ENEMY = pygame.USEREVENT + 1
+pygame.time.set_timer(ADD_ENEMY, 1000)
 # handle game running
 while True: # game loop- controls whether the program should be running or when it should quit
     # if user clicks exit window quit game
@@ -88,9 +112,15 @@ while True: # game loop- controls whether the program should be running or when 
                 sys.exit()
             ''' else:
                 player.update(event) '''
+        elif event.type == ADD_ENEMY:
+                new_enemy = Enemy()
+                enemies.add(new_enemy)
+                all_sprites.add(new_enemy)
+            
                 
     pressed = pygame.key.get_pressed()
-    player.update(pressed)   
+    player.update(pressed) 
+    enemies.update()  
         # fill background color of screen: either a list or tuple is its argument
     screen.fill((137, 13, 15))
         # simply draw a circle on the screen
@@ -100,8 +130,18 @@ while True: # game loop- controls whether the program should be running or when 
         rect = surf.get_rect()
         screen.blit(surf, ((HEIGHT - surf.get_height())/2, (WIDTH - surf.get_width())/2)) ''' # to center our object
     
-    screen.blit(player.avatar, (player.x, player.y))
+    #screen.blit(player.avatar, player.rect)
+    for entity in all_sprites:
+        screen.blit(entity.avatar, entity.rect)
+    # check for collisions
+    if pygame.sprite.spritecollideany(player, enemies):
+        player.kill()
+        main_sound.stop()
+        collision_sound.play()
+        pygame.quit()
+        sys.exit()
         # flip display- updates contents of display to the screen, without this nothing appears
     pygame.display.flip()
+    clock.tick(30) # program should maintain a rate of 30 fps
 
     
