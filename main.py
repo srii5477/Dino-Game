@@ -34,6 +34,15 @@ main_sound.play()
 
 collision_sound = pygame.mixer.Sound("arcade-bleep-sound-6071.mp3")
 # extend pygame.sprite.Sprite using super() (inheritance, returns a delegate object to the parent and extends its functionality)
+class Game:
+    def __init__(self):
+        self.player = Player()
+        self.enemies = pygame.sprite.Group()
+        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites.add(self.player)
+        self.limit = 5
+        self.passbys = 0
+        main_sound.play()
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -92,16 +101,12 @@ class Enemy(pygame.sprite.Sprite):
         
 screen = pygame.display.set_mode([HEIGHT, WIDTH]) # provide a list or tuple to define the screen size
 pygame.display.set_caption("Dodge the Ball!")
-player = Player()
-enemies = pygame.sprite.Group()
-all_sprites = pygame.sprite.Group()
-all_sprites.add(player)
+game = Game()
 ''' now we have to create a steady supply of enemies aka obstacles at regular intervals- create a custom event
 and set its interval '''
 ADD_ENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADD_ENEMY, 1000)
-limit = 5
-passbys = 0
+
 # handle game running
 while True: # game loop- controls whether the program should be running or when it should quit
     # if user clicks exit window quit game
@@ -119,17 +124,17 @@ while True: # game loop- controls whether the program should be running or when 
                 player.update(event) '''
         elif event.type == ADD_ENEMY:
                 new_enemy = Enemy()
-                enemies.add(new_enemy)
-                all_sprites.add(new_enemy)
-                passbys += 1
-                if passbys > limit:
-                    player.score += 5
-                    limit += 5
-                print(player.score)
+                game.enemies.add(new_enemy)
+                game.all_sprites.add(new_enemy)
+                game.passbys += 1
+                if game.passbys > game.limit:
+                    game.player.score += 5
+                    game.limit += 5
+                print(game.player.score)
                 
     pressed = pygame.key.get_pressed()
-    player.update(pressed) 
-    enemies.update()  
+    game.player.update(pressed) 
+    game.enemies.update()  
         # fill background color of screen: either a list or tuple is its argument
     screen.fill((137, 13, 15))
         # simply draw a circle on the screen
@@ -140,16 +145,16 @@ while True: # game loop- controls whether the program should be running or when 
         screen.blit(surf, ((HEIGHT - surf.get_height())/2, (WIDTH - surf.get_width())/2)) ''' # to center our object
     
     #screen.blit(player.avatar, player.rect)
-    for entity in all_sprites:
+    for entity in game.all_sprites:
         screen.blit(entity.avatar, entity.rect)
     # check for collisions
-    if pygame.sprite.spritecollideany(player, enemies):
+    if pygame.sprite.spritecollideany(game.player, game.enemies):
         # you lose! try again page
-        player.kill()
+        game.player.kill()
         main_sound.stop()
         collision_sound.play()
         loser = pygame.font.Font('Micro5-Regular.ttf', 50)
-        new_surf = loser.render(f"You lost! Your final score is {player.score}.", False, (255, 68, 51)) # create a surface off the text
+        new_surf = loser.render(f"You lost! Your final score is {game.player.score}.", False, (255, 68, 51)) # create a surface off the text
         screen.blit(new_surf, (WIDTH/3, HEIGHT/2))
         pygame.display.flip()
         pygame.time.wait(1000)
@@ -164,15 +169,7 @@ while True: # game loop- controls whether the program should be running or when 
             pygame.quit()
             sys.exit()
         else:
-            player = Player()
-            player = Player()
-            enemies = pygame.sprite.Group()
-            all_sprites = pygame.sprite.Group()
-            all_sprites.add(player)
-            ADD_ENEMY = pygame.USEREVENT + 1
-            pygame.time.set_timer(ADD_ENEMY, 1000)
-            limit = 5
-            passbys = 0
+            game = Game()
             continue
         # flip display- updates contents of display to the screen, without this nothing appears
     pygame.display.flip()
