@@ -136,7 +136,12 @@ while True: # game loop- controls whether the program should be running or when 
     game.player.update(pressed) 
     game.enemies.update()  
         # fill background color of screen: either a list or tuple is its argument
-    screen.fill((137, 13, 15))
+    #screen.fill((137, 13, 15))
+    background = pygame.image.load("bgimage.jpg")
+    background = pygame.transform.scale(background, (HEIGHT, WIDTH))
+    screen.fill((255, 255, 255))
+    bg_rect = background.get_rect()
+    screen.blit(background, bg_rect)
         # simply draw a circle on the screen
         # pygame.draw.circle(screen, (0, 0, 0), (250, 250), 75)
     ''' surf = pygame.Surface([100, 100])
