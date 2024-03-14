@@ -10,14 +10,6 @@ import random
 3. maintain a score
 '''
 
-''' google duck game:
-1. move from left to right on the screen
-2. random obstacles coming from right to left
-3. use arrow keys left, right, up, down to avoid obstacles
-4. no score, no time constraints
-5. game ends when either user closes the window, or hits obstacle
-'''
-
 # initializing pygame library- allows pygame to connects its abstractions to my hardware
 pygame.init()
 
@@ -34,6 +26,17 @@ main_sound.play()
 
 collision_sound = pygame.mixer.Sound("arcade-bleep-sound-6071.mp3")
 # extend pygame.sprite.Sprite using super() (inheritance, returns a delegate object to the parent and extends its functionality)
+class Image:
+    def __init__(self, path):
+        self.avatar = pygame.image.load(path).convert_alpha()
+        self.avatar.set_colorkey((255, 255, 255))
+        self.avatar = pygame.transform.smoothscale(self.avatar, (100, 150))
+        self.rect = self.avatar.get_rect(
+            center = (
+                20,
+                HEIGHT/2
+            )
+        )
 class Game:
     def __init__(self):
         self.player = Player()
@@ -48,25 +51,51 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         #self.avatar = pygame.Surface((PLAYER_X, PLAYER_Y))
         #self.avatar.fill((0, 0, 0))
-        self.avatar = pygame.image.load("right.png").convert_alpha()
-        self.avatar.set_colorkey((255, 255, 255))
-        self.avatar = pygame.transform.smoothscale(self.avatar, (100, 150))
-        self.rect = self.avatar.get_rect(
-            center = (
-                20,
-                HEIGHT/2
-            )
-        )
+        image = Image("./positions/left.png")
+        self.avatar = image.avatar
+        self.rect = image.rect
         self.score = 0
     def update(self, pressed):
         if pressed[pygame.K_UP]:
-            self.rect.move_ip(0, -10)
+            image = Image("./positions/up.png")
+            self.avatar = image.avatar
+            self.rect = self.avatar.get_rect(
+                center = (
+                    self.rect.centerx,
+                    self.rect.centery - 10
+                )
+             )
+            #self.rect.move_ip(0, -10)
         if pressed[pygame.K_DOWN]:
-            self.rect.move_ip(0, 10)
+            image = Image("./positions/left.png")
+            self.avatar = image.avatar
+            self.rect = self.avatar.get_rect(
+                center = (
+                    self.rect.centerx,
+                    self.rect.centery + 10
+                )
+             )
+            #self.rect.move_ip(0, 10)
         if pressed[pygame.K_RIGHT]:
-            self.rect.move_ip(10, 0)
+            image = Image("./positions/left.png")
+            self.avatar = image.avatar
+            self.rect = self.avatar.get_rect(
+                center = (
+                    self.rect.centerx + 10,
+                    self.rect.centery 
+                )
+             )
+            #self.rect.move_ip(10, 0)
         if pressed[pygame.K_LEFT]:
-            self.rect.move_ip(-10, 0)
+            image = Image("right.png")
+            self.avatar = image.avatar
+            self.rect = self.avatar.get_rect(
+                center = (
+                    self.rect.centerx - 10,
+                    self.rect.centery
+                )
+             )
+            #self.rect.move_ip(-10, 0)
         # prevent player from hurtling off screen
         if self.rect.left < 0:
             self.rect.left = 0
