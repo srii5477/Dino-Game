@@ -96,20 +96,23 @@ player = Player()
 enemies = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
-limit = 0
 ''' now we have to create a steady supply of enemies aka obstacles at regular intervals- create a custom event
 and set its interval '''
 ADD_ENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADD_ENEMY, 1000)
+limit = 5
+passbys = 0
 # handle game running
 while True: # game loop- controls whether the program should be running or when it should quit
     # if user clicks exit window quit game
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT:
+            # game_state = 0
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
+                # game_state = 0
                 pygame.quit()
                 sys.exit()
             ''' else:
@@ -118,7 +121,11 @@ while True: # game loop- controls whether the program should be running or when 
                 new_enemy = Enemy()
                 enemies.add(new_enemy)
                 all_sprites.add(new_enemy)
-            
+                passbys += 1
+                if passbys > limit:
+                    player.score += 5
+                    limit += 5
+                print(player.score)
                 
     pressed = pygame.key.get_pressed()
     player.update(pressed) 
@@ -146,11 +153,27 @@ while True: # game loop- controls whether the program should be running or when 
         screen.blit(new_surf, (WIDTH/3, HEIGHT/2))
         pygame.display.flip()
         pygame.time.wait(1000)
-        pygame.quit()
-        sys.exit()
-    if len(enemies) > limit:
-        player.score += 5
-        limit = limit + 10
+        screen = pygame.display.set_mode([HEIGHT, WIDTH])
+        screen.fill((144, 238, 144))
+        intro_screen = pygame.font.Font('Micro5-Regular.ttf', 70)
+        intro = intro_screen.render("Try again? Press ESC to exit or wait to restart", False, (255, 68, 51))
+        screen.blit(intro, (10, HEIGHT/5))
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        if event.type == pygame.K_ESCAPE:
+            pygame.quit()
+            sys.exit()
+        else:
+            player = Player()
+            player = Player()
+            enemies = pygame.sprite.Group()
+            all_sprites = pygame.sprite.Group()
+            all_sprites.add(player)
+            ADD_ENEMY = pygame.USEREVENT + 1
+            pygame.time.set_timer(ADD_ENEMY, 1000)
+            limit = 5
+            passbys = 0
+            continue
         # flip display- updates contents of display to the screen, without this nothing appears
     pygame.display.flip()
     clock.tick(30) # program should maintain a rate of 30 fps

@@ -1,4 +1,4 @@
-This is my first PyGame project- a Dodgeball game. It's a simple avoid-collision-with-obstacle game and I designed it to help learn PyGame fundamentals.
+This is my first PyGame project- a Dodgeball game. It's a simple avoid-collision-with-obstacles type game and I designed it to help myself learn PyGame fundamentals.
 Features of the game:
 1. Interactive title screen 
 2. Score tally
