@@ -1,5 +1,6 @@
 import pygame
 import sys
+# address delay in exiting the game from exit screen
 
 # to generate enemies
 import random
