@@ -7,6 +7,7 @@ import random
 ''' tasks:
 1. load up starting screen
 2. position and display the starting text
+3. maintain a score
 '''
 
 ''' google duck game:
@@ -25,9 +26,9 @@ pygame.init()
 WIDTH = 600
 HEIGHT = 800
 
+# curr = GameState.INTRO
 # set up a clock to slow down the frame rate
 clock = pygame.time.Clock()
-
 main_sound = pygame.mixer.Sound("retro-wave-style-track-59892.mp3")
 main_sound.play()
 
@@ -47,6 +48,7 @@ class Player(pygame.sprite.Sprite):
                 HEIGHT/2
             )
         )
+        self.score = 0
     def update(self, pressed):
         if pressed[pygame.K_UP]:
             self.rect.move_ip(0, -10)
@@ -94,6 +96,7 @@ player = Player()
 enemies = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
+limit = 0
 ''' now we have to create a steady supply of enemies aka obstacles at regular intervals- create a custom event
 and set its interval '''
 ADD_ENEMY = pygame.USEREVENT + 1
@@ -138,8 +141,16 @@ while True: # game loop- controls whether the program should be running or when 
         player.kill()
         main_sound.stop()
         collision_sound.play()
+        loser = pygame.font.Font('Micro5-Regular.ttf', 50)
+        new_surf = loser.render(f"You lost! Your final score is {player.score}.", False, (255, 68, 51)) # create a surface off the text
+        screen.blit(new_surf, (WIDTH/3, HEIGHT/2))
+        pygame.display.flip()
+        pygame.time.wait(1000)
         pygame.quit()
         sys.exit()
+    if len(enemies) > limit:
+        player.score += 5
+        limit = limit + 10
         # flip display- updates contents of display to the screen, without this nothing appears
     pygame.display.flip()
     clock.tick(30) # program should maintain a rate of 30 fps
